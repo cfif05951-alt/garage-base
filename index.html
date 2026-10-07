@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>База мастеров</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --badge-bg: #0284c7;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --field-bg: #0f172a;
+      --field-active: #1e3a5f;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 16px 14px 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Login / PIN Screen */
+    #lockScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 20px 10px;
+      min-height: 80vh;
+    }
+    .lock-box {
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 30px 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .lock-icon {
+      font-size: 2.8rem;
+      margin-bottom: 12px;
+    }
+    .lock-box h2 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+    }
+    .lock-box p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    .pin-input {
+      width: 100%;
+      text-align: center;
+      font-size: 1.8rem;
+      letter-spacing: 0.3em;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid var(--card-border);
+      background: var(--field-bg);
+      color: #fff;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .pin-input:focus {
+      border-color: var(--accent);
+    }
+    .unlock-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: var(--badge-bg);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .unlock-btn:active {
+      transform: scale(0.98);
+      background: #0369a1;
+    }
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.85rem;
+      margin-top: 14px;
+      display: none;
+    }
+
+    /* Main Content */
+    #mainContent {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-top: 8px;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+    p.hint {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .search-box {
+      margin-bottom: 16px;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .badge {
+      background: var(--badge-bg);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--field-bg);
+      border: 1px solid #334155;
+      padding: 11px 12px;
+      border-radius: 10px;
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 0.92rem;
+      transition: all 0.15s ease;
+      user-select: none;
+      width: 100%;
+      text-align: left;
+    }
+    .copy-btn:active {
+      transform: scale(0.98);
+      background: var(--field-active);
+    }
+    .copy-btn.copied {
+      border-color: var(--success);
+      background: rgba(34, 197, 94, 0.12);
+    }
+    .copy-btn.copied .copy-label {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .val-text {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      letter-spacing: -0.01em;
+      word-break: break-all;
+      padding-right: 8px;
+    }
+    .copy-label {
+      font-size: 0.75rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .subhead {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: -4px;
+    }
+    /* Toast Alert */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      border-radius: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      pointer-events: none;
+      opacity: 0;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+      z-index: 100;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lock Screen -->
+  <div id="lockScreen">
+    <div class="lock-box">
+      <div class="lock-icon">🔒</div>
+      <h2>Доступ закрыт</h2>
+      <p>Введите PIN-код для просмотра базы</p>
+      <input type="password" id="pinInput" class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" autofocus>
+      <button class="unlock-btn" onclick="attemptUnlock()">Войти</button>
+      <div class="error-msg" id="errorMsg">Неверный PIN-код</div>
+    </div>
+  </div>
+
+  <!-- Content Screen -->
+  <div id="mainContent">
+    <header>
+      <h1>Доступы мастеров</h1>
+      <p class="hint">Нажми на логин или пароль, чтобы скопировать</p>
+    </header>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Поиск мастера или почты..." oninput="filterCards()">
+    </div>
+
+    <div class="list" id="mastersList"></div>
+  </div>
+
+  <div id="toast">Скопировано!</div>
+
+  <script>
+    // Зашифрованные данные (AES-256-CBC + PBKDF2)
+    const ENCRYPTED_PAYLOAD = {
+      salt: "Poe08gCQE6Y7v9Oy6P64kA==",
+      iv: "8EuQZelCaxFwXY12dz8seg==",
+      data: "6aql0UO3M8vF6cNDeQdzaHCyln3ZWI7OoHple7M4OcydaRYIiKKvW2ASMpG/bniby5tTrZ20CFOpb2nsmLEFizjAEA4kIeVrE+znOUExQPFoupp4OSPAJPF4rRg5hbLpVqgQgW/obchgoe3rtJYfkh6DpZXzTLUiMZ8xfYoO5ky4QA2mfj3CaAHkBbB3ksY67UlX5uZnq7Z3j0wvjZIZFE5Mt6WGrOgQc3ZYC7V4zbP+kBg7dJmw8c4gdDB6DifE8qABEPIutClnWzF4cRWx5s9Jr0IqDXWgzGYt57WHd/c8UQlEvkl5i0/LrMyXw4Ag7r48AIlY82wgxO6SW1ysLBd02pAIBmbAAh9VRhDcpzjnsPVJ8mbEX9ZKtWiFVWvqLpVzT6rRbtR3Z39AOZD2WZunxTPtWrxHpPi8Y9AXrLCUBHZEr8618bcdqv8v8QVeqD2Z9KmniwuqOqSwvfaGWMMtBhio0U1xH6ClkGtFljwjeGqc6tDhFPW70g5tIvzuiao3GFWEIHLpppnhBcEn/3gHMy5OtI/7EQMlkagrRM3ZGH0XZJdc3CmESdniC+7l3en8CWfXPAku70cLIPohgeDBjLaYcHvKfGkZ5zmZ6MUFpdD6TO8906cSFEJqwMjfjvFOYKGR015irtyWxbJEPR+r8xGozgK+HgUDYrev16xuDQuCY3GjF0Rm+YcLIeS0YuKj3t4VGLvq/lcajuxCB+gDPOn0bQ3w2fA4KfzlAvbnPblixZGDwtORhsR57bAgSA0GjcHhWMG+Y0U2foEcsZsRlphB0nAMx31b0LXvJwHpii76OWViPA1RJjzkSwF2Uj/ZYlkrYqs7TQ6lXvx6/bpqf/V9FcMA3V6SL+y2BZv7W9PBjdYk+iMuHg06KebnCNJMKU4qfYKVlmNDAsNK7mOb9MJ8V1geM0v6/nb9qBk6nsj4D4xXJjk0Px8ak5DMD8lEMeXyeCx00uxMQIL+WloVzADz62fisoxgzlCqNVdUTUaoKbQJlij2UUBK2PhgnQRGfzUVnWVkZp6YXgqP/6o84Z4A3gYWrTaHJidLPtZZNmWFcnXtB/5KPbrw20mac5hjcUBA/wY1LB3Z6bhL6b6MjDjbSQ1287g6B2VSbSNauN0BPsZieObfGiZ/h4vlt3k/QflPcZKZftgxtQB4lhUd3/AZ/aEQVb4GBJXaxTy3L+YC4zS/DwynpLllUDx9L7MWQjKD8Y/RXu+kh4wvWM4L3xiNIOxpQgNGfLY5EIhfHxYh4JY1AfAZA0MZmO0GuEFLVrSvURxDPqGpvaArSXXMvKOwgruQiRzGdPSqiZI="
+    };
+
+    let decryptedData = [];
+    const listContainer = document.getElementById('mastersList');
+    const toast = document.getElementById('toast');
+    let toastTimeout;
+
+    // Автоматическая отправка по Enter
+    document.getElementById('pinInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') attemptUnlock();
+    });
+
+    async function attemptUnlock() {
+      const pin = document.getElementById('pinInput').value.trim();
+      const errEl = document.getElementById('errorMsg');
+      if (!pin) return;
+
+      try {
+        const salt = Uint8Array.from(atob(ENCRYPTED_PAYLOAD.salt), c => c.charCodeAt(0));
+        const iv = Uint8Array.from(atob(ENCRYPTED_PAYLOAD.iv), c => c.charCodeAt(0));
+        const ciphertext = Uint8Array.from(atob(ENCRYPTED_PAYLOAD.data), c => c.charCodeAt(0));
+
+        const enc = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+          "raw",
+          enc.encode(pin),
+          "PBKDF2",
+          false,
+          ["deriveKey"]
+        );
+
+        const key = await crypto.subtle.deriveKey(
+          {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: 100000,
+            hash: "SHA-256"
+          },
+          keyMaterial,
+          { name: "AES-CBC", length: 256 },
+          false,
+          ["decrypt"]
+        );
+
+        const decrypted = await crypto.subtle.decrypt(
+          { name: "AES-CBC", iv: iv },
+          key,
+          ciphertext
+        );
+
+        const dec = new TextDecoder();
+        decryptedData = JSON.parse(dec.decode(decrypted));
+
+        // Успешный вход
+        document.getElementById('lockScreen').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        renderList(decryptedData);
+
+      } catch (e) {
+        errEl.style.display = 'block';
+        const pinInp = document.getElementById('pinInput');
+        pinInp.value = '';
+        pinInp.focus();
+        if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
+      }
+    }
+
+    function renderList(items) {
+      listContainer.innerHTML = '';
+      if(items.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:30px 0;">Ничего не найдено</div>';
+        return;
+      }
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-header">
+            <span class="badge">Мастер #${item.id}</span>
+          </div>
+          <div class="field-group">
+            <span class="subhead">Логин</span>
+            <div class="copy-btn" onclick="copyText('${item.login}', this)">
+              <span class="val-text">${item.login}</span>
+              <span class="copy-label">копировать</span>
+            </div>
+            <span class="subhead" style="margin-top: 4px;">Пароль</span>
+            <div class="copy-btn" onclick="copyText('${item.pass}', this)">
+              <span class="val-text">${item.pass}</span>
+              <span class="copy-label">копировать</span>
+            </div>
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    function copyText(text, element) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => showFeedback(element));
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showFeedback(element);
+        } catch (err) {
+          console.error('Ошибка копирования', err);
+        }
+        textArea.remove();
+      }
+    }
+
+    function showFeedback(element) {
+      element.classList.add('copied');
+      const label = element.querySelector('.copy-label');
+      const originalText = label.textContent;
+      label.textContent = '✓ скопировано';
+
+      setTimeout(() => {
+        element.classList.remove('copied');
+        label.textContent = originalText;
+      }, 1500);
+
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 1200);
+
+      if (navigator.vibrate) {
+        navigator.vibrate(40);
+      }
+    }
+
+    function filterCards() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = decryptedData.filter(i => 
+        i.id.includes(q) || 
+        i.login.toLowerCase().includes(q)
+      );
+      renderList(filtered);
+    }
+  </script>
+</body>
+</html>
